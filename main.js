@@ -68,7 +68,6 @@ const material = new THREE.MeshStandardMaterial({
 // material.wireframe = true
 
 //GROUND
-
 const groundGeometry = new THREE.BoxBufferGeometry(10, 1, 10, 10, 1, 10)
 
 groundGeometry.attributes.position.array.forEach((value, index) => {
@@ -88,8 +87,24 @@ const ground = new THREE.Mesh(
 ground.castShadow = true
 ground.receiveShadow = true
 
-// TREE
+scene.add(ground)
 
+//WATER
+const waterGeometry = new THREE.PlaneBufferGeometry(ground.geometry.parameters.width, ground.geometry.parameters.depth, ground.geometry.parameters.width)
+const water = new THREE.Mesh(
+	waterGeometry,
+	new THREE.MeshStandardMaterial({
+		color: 0x00ffff,
+		roughness: 0.5,
+		metalness: 0.5
+	})
+)
+water.position.y = Math.random() * (0.4 - 0.2) + 0.2
+water.rotation.x = -Math.PI / 2
+
+scene.add(water)
+
+// TREE
 const trunkGeometry = new THREE.CylinderBufferGeometry(0.1, 0.1, 1, 6)
 const leavesGeometry = new THREE.ConeBufferGeometry(1, 1, 6)
 
@@ -117,17 +132,19 @@ function createTreeObject () {
 	}
 
 	tree.position.y = Math.random() * (2 - 1.5) + 1.5
-	//use ground.geometry.parameters
-	tree.position.x = Math.random() * (ground.geometry.parameters.width / 2 + ground.geometry.parameters.width / 2) - ground.geometry.parameters.width / 2
-	tree.position.z = Math.random() * (ground.geometry.parameters.depth / 2 + ground.geometry.parameters.depth / 2) - ground.geometry.parameters.depth / 2
-	tree.scale.set(2, 2, 2)
+	tree.position.x = Math.random() * (ground.geometry.parameters.width / 2 - (-ground.geometry.parameters.width / 2 + 0.5)) - ground.geometry.parameters.width / 2 + 0.5
+	tree.position.z = Math.random() * (ground.geometry.parameters.depth / 2 - (-ground.geometry.parameters.depth / 2 + 0.5)) - ground.geometry.parameters.depth / 2 + 0.5
+	const treeScale = Math.random() * (2 - 1.5) + 1.5
+	tree.scale.set(treeScale, treeScale, treeScale)
 	tree.add(trunk)
+
 	scene.add(tree)
 }
 
-Array(10).fill(0).forEach(createTreeObject)
+for (let i = 0; i < 10; i++) {
+	createTreeObject()
+}
 
-scene.add(ground)
 
 //RENDERER
 const renderer = new THREE.WebGLRenderer({
