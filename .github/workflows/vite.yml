@@ -28,7 +28,7 @@ jobs:
         git config user.email "<>"
     - name: Commit
       run: |
-        git add dist/
+        git add dist/ -f
         git commit -m "🚀 deploy"
         git push 
     - name: 🚀 Deploy on github pages
