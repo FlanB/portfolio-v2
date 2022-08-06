@@ -29,11 +29,32 @@ addEventListener("resize", () => {
 
 // PARAMETERS
 const parameters = {
-	backgroundColor: "#536375",
-	"groundSize": 10,
+	"backgroundColor": "#536375",
+	"showDirectionalLightHelper": true,
+	"ground": {
+		"size": 10,
+		"color": "#dcdcdc",
+		"roughness": 0.6,
+		"metalness": 0.05
+	},
 	"water": {
 		"height": 0.3,
-		"color": "#00ffff"
+		"color": "#00ffff",
+		"roughness": 0.5,
+		"metalness": 0.1
+	},
+	"trees": {
+		"count": 20,
+		"leaves": {
+			"color": "#214829",
+			"roughness": 0.9,
+			"metalness": 0
+		},
+		"trunk": {
+			"color": "#392400",
+			"roughness": 0.9,
+			"metalness": 0
+		}
 	}
 }
 
@@ -58,6 +79,7 @@ scene.add(directionalLight, ambientLight)
 
 //HELPERS
 const directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight, 10)
+directionalLightHelper.visible = parameters.showDirectionalLightHelper
 scene.add(directionalLightHelper)
 
 //CAMERA
@@ -79,6 +101,13 @@ const material = new THREE.MeshStandardMaterial({
 
 //GROUND
 const groundGeometry = new THREE.BoxBufferGeometry(1, 1, 1, 10, 1, 10)
+const groundMaterial = new THREE.MeshStandardMaterial({
+	color: parameters.ground.color,
+	roughness: parameters.ground.roughness,
+	metalness: parameters.ground.metalness,
+	flatShading: true
+
+})
 
 groundGeometry.attributes.position.array.forEach((value, index) => {
 		if (index % 3 === 1 && Math.random() > 0.66) {
@@ -92,9 +121,9 @@ groundGeometry.attributes.position.array.forEach((value, index) => {
 )
 const ground = new THREE.Mesh(
 	groundGeometry,
-	material
+	groundMaterial
 )
-ground.scale.set(parameters.groundSize, 1, parameters.groundSize)
+ground.scale.set(parameters.ground.size, 1, parameters.ground.size)
 ground.castShadow = true
 ground.receiveShadow = true
 
@@ -106,19 +135,31 @@ const water = new THREE.Mesh(
 	waterGeometry,
 	new THREE.MeshStandardMaterial({
 		color: parameters.water.color,
-		roughness: 0.5,
-		metalness: 0.5
+		roughness: parameters.water.roughness,
+		metalness: parameters.water.metalness
 	})
 )
 water.position.y = parameters.water.height
 water.rotation.x = -Math.PI * 0.5
-water.scale.set(parameters.groundSize, parameters.groundSize)
+water.scale.set(parameters.ground.size, parameters.ground.size)
 
 scene.add(water)
 
 // TREE
 const trunkGeometry = new THREE.CylinderBufferGeometry(0.1, 0.1, 1, 6)
+const trunkMaterial = new THREE.MeshStandardMaterial({
+	color: parameters.trees.trunk.color,
+	roughness: parameters.trees.trunk.roughness,
+	metalness: parameters.trees.trunk.metalness,
+	flatShading: true
+})
 const leavesGeometry = new THREE.ConeBufferGeometry(1, 1, 6)
+const leavesMaterial = new THREE.MeshStandardMaterial({
+	color: parameters.trees.leaves.color,
+	roughness: parameters.trees.leaves.roughness,
+	metalness: parameters.trees.leaves.metalness,
+	flatShading: true
+})
 
 function createTreeObject () {
 	const tree = new THREE.Group()
@@ -126,12 +167,14 @@ function createTreeObject () {
 	//TRUNK
 	const trunk = new THREE.Mesh(
 		trunkGeometry,
-		material
+		trunkMaterial
 	)
 	trunk.position.y = -trunk.geometry.parameters.height / 2
 
 	trunk.castShadow = true
 	trunk.receiveShadow = true
+
+	trunk.name = "trunk"
 
 	tree.add(trunk)
 
@@ -141,7 +184,7 @@ function createTreeObject () {
 	for (let i = 1; i <= leavesCount; i++) {
 		const leaves = new THREE.Mesh(
 			leavesGeometry,
-			material
+			leavesMaterial
 		)
 		leaves.position.y = i ** 0.25 - 1
 		leaves.scale.set(1 / (i + 1), 1 / (i + 1), 1 / (i + 1))
@@ -150,42 +193,164 @@ function createTreeObject () {
 		leaves.castShadow = true
 		leaves.receiveShadow = true
 
+		leaves.name = "leaves"
+
 		tree.add(leaves)
 	}
 
 	//TREE ATTRIBUTES
 	tree.position.y = Math.random() * (2 - 1.5) + 1.5
-	tree.position.x = Math.random() * (parameters.groundSize / 2 - (-parameters.groundSize / 2 + 1)) - parameters.groundSize / 2 + 1
-	tree.position.z = Math.random() * (parameters.groundSize / 2 - (-parameters.groundSize / 2 + 1)) - parameters.groundSize / 2 + 1
+	tree.position.x = Math.random() * ((parameters.ground.size / 2 - 1) - (-parameters.ground.size / 2 + 1)) + (-parameters.ground.size / 2 + 1)
+	tree.position.z = Math.random() * ((parameters.ground.size / 2 - 1) - (-parameters.ground.size / 2 + 1)) + (-parameters.ground.size / 2 + 1)
 	tree.scale.set(Math.random() * (2 - 1.5) + 1.5, Math.random() * (2 - 1.5) + 1.5, Math.random() * (2 - 1.5) + 1.5)
 	tree.rotation.set((Math.random() - 0.5) * 0.1, (Math.random() - 0.5) * 0.1, (Math.random() - 0.5) * 0.1)
+
+	tree.name = "tree"
+
 	scene.add(tree)
 }
 
-for (let i = 0; i < 10; i++) {
+for (let i = 0; i < parameters.trees.count; i++) {
 	createTreeObject()
 }
 
-// GUI
-console.log(scene.background)
+/*
+* GUI
+* */
+
+//scene
 gui.addColor(parameters, "backgroundColor").onChange(() => {
 	scene.background.set(parameters.backgroundColor)
 	scene.fog.color.set(parameters.backgroundColor)
 })
-const groundFolder = gui.addFolder("Ground")
-groundFolder.add(parameters, "groundSize", 1, 20, 1).onChange(() => {
-	ground.scale.x = parameters.groundSize
-	ground.scale.z = parameters.groundSize
 
-	water.scale.x = parameters.groundSize
-	water.scale.y = parameters.groundSize
+//light
+gui.add(parameters, "showDirectionalLightHelper").onChange(() => {
+	directionalLightHelper.visible = parameters.showDirectionalLightHelper
 })
+
+//ground
+const groundFolder = gui.addFolder("Ground")
+groundFolder.add(parameters.ground, "size", 1, 20, 1).onChange(() => {
+	ground.scale.x = parameters.ground.size
+	ground.scale.z = parameters.ground.size
+
+	water.scale.x = parameters.ground.size
+	water.scale.y = parameters.ground.size
+})
+groundFolder.addColor(parameters.ground, "color").onChange(() => {
+	groundMaterial.color.set(parameters.ground.color)
+})
+groundFolder.add(parameters.ground, "roughness", 0, 1, 0.01).onChange(() => {
+	groundMaterial.roughness = parameters.ground.roughness
+})
+groundFolder.add(parameters.ground, "metalness", 0, 1, 0.01).onChange(() => {
+	groundMaterial.metalness = parameters.ground.metalness
+})
+
+//water
 const waterFolder = gui.addFolder("Water")
 waterFolder.add(parameters.water, "height", 0.2, 0.4, 0.01).onChange(() => {
 	water.position.y = parameters.water.height
 })
 waterFolder.addColor(parameters.water, "color").onChange(() => {
 	water.material.color.set(parameters.water.color)
+})
+waterFolder.add(parameters.water, "roughness", 0, 1, 0.01).onChange(() => {
+	water.material.roughness = parameters.water.roughness
+})
+waterFolder.add(parameters.water, "metalness", 0, 1, 0.01).onChange(() => {
+	water.material.metalness = parameters.water.metalness
+})
+
+//trees
+const treesFolder = gui.addFolder("Trees")
+let previousTreesCount = parameters.trees.count
+treesFolder.add(parameters.trees, "count", 0, 100, 1).onChange((e) => {
+	console.log()
+	if (e > previousTreesCount) {
+		for (let i = 0; i < e - previousTreesCount; i++) {
+			createTreeObject()
+		}
+	} else {
+		for (let i = 0; i < previousTreesCount - e; i++) {
+			scene.remove(scene.getObjectByName("tree"))
+		}
+	}
+	previousTreesCount = e
+})
+const treesLeavesFolder = treesFolder.addFolder("Leaves")
+treesLeavesFolder.addColor(parameters.trees.leaves, "color").onChange(() => {
+		scene.traverse((object) => {
+			if (object.name === "tree") {
+				object.traverse((object) => {
+					if (object.name === "leaves") {
+						object.material.color.set(parameters.trees.leaves.color)
+					}
+				})
+			}
+		})
+	}
+)
+treesLeavesFolder.add(parameters.trees.leaves, "roughness", 0, 1, 0.01).onChange(() => {
+	scene.traverse((object) => {
+			if (object.name === "tree") {
+				object.traverse((object) => {
+					if (object.name === "leaves") {
+						object.material.roughness = parameters.trees.leaves.roughness
+					}
+				})
+			}
+		}
+	)
+})
+treesLeavesFolder.add(parameters.trees.leaves, "metalness", 0, 1, 0.01).onChange(() => {
+	scene.traverse((object) => {
+			if (object.name === "tree") {
+				object.traverse((object) => {
+					if (object.name === "leaves") {
+						object.material.metalness = parameters.trees.leaves.metalness
+					}
+				})
+			}
+		}
+	)
+})
+const treesTrunkFolder = treesFolder.addFolder("Trunk")
+treesTrunkFolder.addColor(parameters.trees.trunk, "color").onChange(() => {
+	scene.traverse((object) => {
+		if (object.name === "tree") {
+			object.traverse((object) => {
+				if (object.name === "trunk") {
+					object.material.color.set(parameters.trees.trunk.color)
+				}
+			})
+		}
+	})
+})
+treesTrunkFolder.add(parameters.trees.trunk, "roughness", 0, 1, 0.01).onChange(() => {
+	scene.traverse((object) => {
+			if (object.name === "tree") {
+				object.traverse((object) => {
+					if (object.name === "trunk") {
+						object.material.roughness = parameters.trees.trunk.roughness
+					}
+				})
+			}
+		}
+	)
+})
+treesTrunkFolder.add(parameters.trees.trunk, "metalness", 0, 1, 0.01).onChange(() => {
+	scene.traverse((object) => {
+			if (object.name === "tree") {
+				object.traverse((object) => {
+					if (object.name === "trunk") {
+						object.material.metalness = parameters.trees.trunk.metalness
+					}
+				})
+			}
+		}
+	)
 })
 
 //RENDERER
@@ -194,6 +359,7 @@ const renderer = new THREE.WebGLRenderer({
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.shadowMap.enabled = true
+renderer.shadowMap.type = THREE.PCFSoftShadowMap
 renderer.render(scene, camera)
 
 //CONTROLS
