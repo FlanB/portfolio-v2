@@ -29,7 +29,9 @@ jobs:
         git add dist/ -f
         
         git stash
-        git checkout origin/gh-pages
+        git remote update
+        git fetch 
+        git checkout --track origin/gh-pages
         git stash pop
         git commit -m "🚀 deploy"
         git push 
