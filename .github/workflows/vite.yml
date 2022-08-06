@@ -27,9 +27,10 @@ jobs:
     - name: Commit
       run: |
         git add dist/ -f
-        git commit -m "🚀 deploy"
+        
         git stash
         git checkout gh-pages
         git stash pop
+        git commit -m "🚀 deploy"
         git push 
       
