@@ -31,6 +31,8 @@ addEventListener("resize", () => {
 const parameters = {
 	"backgroundColor": "#536375",
 	"showDirectionalLightHelper": true,
+	"directionalLightColor": "#ffffff",
+	"directionalLightIntensity": 1,
 	"ground": {
 		"size": 10,
 		"color": "#dcdcdc",
@@ -64,7 +66,7 @@ scene.background = new THREE.Color(parameters.backgroundColor)
 scene.fog = new THREE.Fog(scene.background, 1, 20)
 
 //LIGHT
-const directionalLight = new THREE.DirectionalLight("#fff5ee", 1)
+const directionalLight = new THREE.DirectionalLight(parameters.directionalLightColor, parameters.directionalLightIntensity)
 directionalLight.position.y = 10
 directionalLight.lookAt(new THREE.Vector3())
 directionalLight.castShadow = true
@@ -225,6 +227,14 @@ gui.addColor(parameters, "backgroundColor").onChange(() => {
 })
 
 //light
+gui.addColor(parameters, "directionalLightColor").onChange(() => {
+	directionalLight.color.set(parameters.directionalLightColor)
+})
+gui.add(parameters, "directionalLightIntensity", 0, 1).onChange(() => {
+	directionalLight.intensity = parameters.directionalLightIntensity
+})
+
+//helper
 gui.add(parameters, "showDirectionalLightHelper").onChange(() => {
 	directionalLightHelper.visible = parameters.showDirectionalLightHelper
 })
