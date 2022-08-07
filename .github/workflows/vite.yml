@@ -26,7 +26,7 @@ jobs:
         git config user.email "<>"
     - name: Commit
       run: |
-        git add dist/ -f
+        git add dist/index.html assets/ -f
         
         git stash
         git remote update
