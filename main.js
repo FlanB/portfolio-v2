@@ -57,6 +57,13 @@ const parameters = {
 			"roughness": 0.9,
 			"metalness": 0
 		}
+	},
+	"snow": {
+		"visible": true,
+		"count": 200,
+		"size": 0.1,
+		"color": "#ffffff",
+		"speed": 0.1
 	}
 }
 
@@ -90,6 +97,37 @@ camera.position.z = 5
 camera.position.y = 2
 
 scene.add(camera)
+
+//PARTICLES
+const snowParticlesGeometry = new THREE.BufferGeometry()
+
+function generateSnowParticlesAttributes () {
+	const snowParticlesPosition = new Float32Array(parameters.snow.count * 3)
+	const snowParticlesVelocity = new Float32Array(parameters.snow.count * 3)
+
+	for (let i = 0; i < parameters.snow.count; i++) {
+		snowParticlesPosition[i] = Math.random() * parameters.ground.size - parameters.ground.size / 2
+		snowParticlesVelocity[i] = Math.random() * parameters.snow.speed
+	}
+
+	snowParticlesGeometry.setAttribute("position", new THREE.BufferAttribute(snowParticlesPosition, 3))
+	snowParticlesGeometry.setAttribute("velocity", new THREE.BufferAttribute(snowParticlesVelocity, 3))
+}
+
+generateSnowParticlesAttributes()
+
+const snowParticlesMaterial = new THREE.PointsMaterial({
+	color: parameters.snow.color,
+	roughness: parameters.snow.roughness,
+	metalness: parameters.snow.metalness,
+	size: parameters.snow.size,
+	sizeAttenuation: true
+})
+const snowParticles = new THREE.Points(snowParticlesGeometry, snowParticlesMaterial)
+snowParticles.name = "snowParticles"
+snowParticles.visible = parameters.snow.visible
+
+scene.add(snowParticles)
 
 /*
 * OBJECTS
@@ -215,6 +253,53 @@ function createTreeObject () {
 for (let i = 0; i < parameters.trees.count; i++) {
 	createTreeObject()
 }
+
+//RENDERER
+const renderer = new THREE.WebGLRenderer({
+	canvas
+})
+renderer.setSize(sizes.width, sizes.height)
+renderer.shadowMap.enabled = true
+renderer.shadowMap.type = THREE.PCFSoftShadowMap
+renderer.render(scene, camera)
+
+//CONTROLS
+const controls = new OrbitControls(camera, renderer.domElement)
+controls.update()
+
+//ANIMATION
+const clock = new THREE.Clock()
+
+const animate = () => {
+	requestAnimationFrame(animate)
+
+	//light
+	directionalLight.position.x = Math.sin(clock.getElapsedTime() * 0.1) * 20
+	directionalLight.position.z = Math.cos(clock.getElapsedTime() * 0.1) * 10
+	directionalLight.lookAt(ground.position)
+
+	//snow
+	for (let i = 0; i < snowParticlesGeometry.attributes.position.count; i++) {
+		const i3 = i * 3
+		snowParticlesGeometry.attributes.position.array[i3] += snowParticlesGeometry.attributes.velocity.array[i3] * parameters.snow.speed
+		snowParticlesGeometry.attributes.position.array[i3 + 1] -= snowParticlesGeometry.attributes.velocity.array[i3 + 1] * parameters.snow.speed
+		snowParticlesGeometry.attributes.position.array[i3 + 2] += snowParticlesGeometry.attributes.velocity.array[i3 + 2] * parameters.snow.speed
+		if (snowParticlesGeometry.attributes.position.array[i3] > parameters.ground.size / 2) {
+			snowParticlesGeometry.attributes.position.array[i3] = -parameters.ground.size / 2
+		}
+		if (snowParticlesGeometry.attributes.position.array[i3 + 1] < 0) {
+			snowParticlesGeometry.attributes.position.array[i3 + 1] = Math.random() * 10
+		}
+		if (snowParticlesGeometry.attributes.position.array[i3 + 2] > parameters.ground.size / 2) {
+			snowParticlesGeometry.attributes.position.array[i3 + 2] = -parameters.ground.size / 2
+		}
+	}
+	snowParticlesGeometry.attributes.position.needsUpdate = true
+
+	stats.update()
+	renderer.render(scene, camera)
+}
+animate()
 
 /*
 * GUI
@@ -363,30 +448,21 @@ treesTrunkFolder.add(parameters.trees.trunk, "metalness", 0, 1, 0.01).onChange((
 	)
 })
 
-//RENDERER
-const renderer = new THREE.WebGLRenderer({
-	canvas
+//snow
+const snowFolder = gui.addFolder("Snow")
+snowFolder.add(parameters.snow, "visible").onChange(() => {
+	snowParticles.visible = parameters.snow.visible
 })
-renderer.setSize(sizes.width, sizes.height)
-renderer.shadowMap.enabled = true
-renderer.shadowMap.type = THREE.PCFSoftShadowMap
-renderer.render(scene, camera)
-
-//CONTROLS
-const controls = new OrbitControls(camera, renderer.domElement)
-controls.update()
-
-//ANIMATION
-const clock = new THREE.Clock()
-
-const animate = () => {
-	requestAnimationFrame(animate)
-
-	directionalLight.position.x = Math.sin(clock.getElapsedTime() * 0.1) * 20
-	directionalLight.position.z = Math.cos(clock.getElapsedTime() * 0.1) * 10
-	directionalLight.lookAt(ground.position)
-
-	stats.update()
-	renderer.render(scene, camera)
-}
-animate()
+snowFolder.add(parameters.snow, "count", 0, 500, 1).onChange(() => {
+	generateSnowParticlesAttributes()
+	snowParticles.geometry.attributes.position.needsUpdate = true
+})
+snowFolder.add(parameters.snow, "size", 0, 1, 0.01).onChange(() => {
+	snowParticlesMaterial.size = parameters.snow.size
+})
+snowFolder.addColor(parameters.snow, "color").onChange(() => {
+	snowParticlesMaterial.color.set(parameters.snow.color)
+})
+snowFolder.add(parameters.snow, "speed", 0, 1, 0.01).onChange(() => {
+	snowParticlesMaterial.speed = parameters.snow.speed
+})
