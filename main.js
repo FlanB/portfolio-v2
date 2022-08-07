@@ -133,13 +133,7 @@ scene.add(snowParticles)
 * OBJECTS
 * */
 
-const material = new THREE.MeshStandardMaterial({
-	color: 0xffffff
-})
-
-// material.wireframe = true
-
-//GROUND
+//ground
 const groundGeometry = new THREE.BoxBufferGeometry(1, 1, 1, 10, 1, 10)
 const groundMaterial = new THREE.MeshStandardMaterial({
 	color: parameters.ground.color,
@@ -169,7 +163,7 @@ ground.receiveShadow = true
 
 scene.add(ground)
 
-//WATER
+//water
 const waterGeometry = new THREE.PlaneBufferGeometry()
 const water = new THREE.Mesh(
 	waterGeometry,
@@ -185,7 +179,7 @@ water.scale.set(parameters.ground.size, parameters.ground.size)
 
 scene.add(water)
 
-// TREE
+//tree
 const trunkGeometry = new THREE.CylinderBufferGeometry(0.1, 0.1, 1, 6)
 const trunkMaterial = new THREE.MeshStandardMaterial({
 	color: parameters.trees.trunk.color,
@@ -256,7 +250,7 @@ for (let i = 0; i < parameters.trees.count; i++) {
 
 //RENDERER
 const renderer = new THREE.WebGLRenderer({
-	canvas
+	canvas,
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.shadowMap.enabled = true
