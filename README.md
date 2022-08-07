@@ -8,7 +8,7 @@ This is a simple portfolio that I currently made to upgrade my skills in THREE.j
 - [x] Tree
 - [x] Snow
 - [ ] Daylight cycle
-- [ ] Tree leaves wind animation
+- [x] Wind animation
 - [ ] When the mouse overing the tree, the leaves moves
 - [ ] Water animation
 - [ ] Ground generation, when there is water next to it, there is more chance that there is still water

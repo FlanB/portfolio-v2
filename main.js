@@ -33,6 +33,7 @@ const parameters = {
 	"showDirectionalLightHelper": true,
 	"directionalLightColor": "#ffffff",
 	"directionalLightIntensity": 1,
+	"windIntensity": 0.1,
 	"ground": {
 		"size": 10,
 		"color": "#dcdcdc",
@@ -63,7 +64,6 @@ const parameters = {
 		"count": 200,
 		"size": 0.1,
 		"color": "#ffffff",
-		"speed": 0.1
 	}
 }
 
@@ -107,7 +107,7 @@ function generateSnowParticlesAttributes () {
 
 	for (let i = 0; i < parameters.snow.count; i++) {
 		snowParticlesPosition[i] = Math.random() * parameters.ground.size - parameters.ground.size / 2
-		snowParticlesVelocity[i] = Math.random() * parameters.snow.speed
+		snowParticlesVelocity[i] = Math.random() * 0.1
 	}
 
 	snowParticlesGeometry.setAttribute("position", new THREE.BufferAttribute(snowParticlesPosition, 3))
@@ -118,8 +118,6 @@ generateSnowParticlesAttributes()
 
 const snowParticlesMaterial = new THREE.PointsMaterial({
 	color: parameters.snow.color,
-	roughness: parameters.snow.roughness,
-	metalness: parameters.snow.metalness,
 	size: parameters.snow.size,
 	sizeAttenuation: true
 })
@@ -140,7 +138,6 @@ const groundMaterial = new THREE.MeshStandardMaterial({
 	roughness: parameters.ground.roughness,
 	metalness: parameters.ground.metalness,
 	flatShading: true
-
 })
 
 groundGeometry.attributes.position.array.forEach((value, index) => {
@@ -250,7 +247,7 @@ for (let i = 0; i < parameters.trees.count; i++) {
 
 //RENDERER
 const renderer = new THREE.WebGLRenderer({
-	canvas,
+	canvas
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.shadowMap.enabled = true
@@ -273,22 +270,33 @@ const animate = () => {
 	directionalLight.lookAt(ground.position)
 
 	//snow
-	for (let i = 0; i < snowParticlesGeometry.attributes.position.count; i++) {
-		const i3 = i * 3
-		snowParticlesGeometry.attributes.position.array[i3] += snowParticlesGeometry.attributes.velocity.array[i3] * parameters.snow.speed
-		snowParticlesGeometry.attributes.position.array[i3 + 1] -= snowParticlesGeometry.attributes.velocity.array[i3 + 1] * parameters.snow.speed
-		snowParticlesGeometry.attributes.position.array[i3 + 2] += snowParticlesGeometry.attributes.velocity.array[i3 + 2] * parameters.snow.speed
-		if (snowParticlesGeometry.attributes.position.array[i3] > parameters.ground.size / 2) {
-			snowParticlesGeometry.attributes.position.array[i3] = -parameters.ground.size / 2
+	if (parameters.snow.visible) {
+		for (let i = 0; i < snowParticlesGeometry.attributes.position.count; i++) {
+			const i3 = i * 3
+			snowParticlesGeometry.attributes.position.array[i3] += snowParticlesGeometry.attributes.velocity.array[i3] * parameters.windIntensity
+			snowParticlesGeometry.attributes.position.array[i3 + 1] -= snowParticlesGeometry.attributes.velocity.array[i3 + 1] * parameters.windIntensity
+			snowParticlesGeometry.attributes.position.array[i3 + 2] += snowParticlesGeometry.attributes.velocity.array[i3 + 2] * parameters.windIntensity
+			if (snowParticlesGeometry.attributes.position.array[i3] > parameters.ground.size / 2) {
+				snowParticlesGeometry.attributes.position.array[i3] = -parameters.ground.size / 2
+			}
+			if (snowParticlesGeometry.attributes.position.array[i3 + 1] < 0) {
+				snowParticlesGeometry.attributes.position.array[i3 + 1] = Math.random() * 10
+			}
+			if (snowParticlesGeometry.attributes.position.array[i3 + 2] > parameters.ground.size / 2) {
+				snowParticlesGeometry.attributes.position.array[i3 + 2] = -parameters.ground.size / 2
+			}
 		}
-		if (snowParticlesGeometry.attributes.position.array[i3 + 1] < 0) {
-			snowParticlesGeometry.attributes.position.array[i3 + 1] = Math.random() * 10
-		}
-		if (snowParticlesGeometry.attributes.position.array[i3 + 2] > parameters.ground.size / 2) {
-			snowParticlesGeometry.attributes.position.array[i3 + 2] = -parameters.ground.size / 2
-		}
+		snowParticlesGeometry.attributes.position.needsUpdate = true
 	}
-	snowParticlesGeometry.attributes.position.needsUpdate = true
+
+	//tree
+	scene.children.filter(child => child.name === "tree").forEach(tree => {
+		tree.children.filter(child => child.name === "leaves").forEach(leaves => {
+
+			leaves.rotation.z = Math.abs(Math.sin(clock.getElapsedTime() * parameters.windIntensity * 10)) * 0.01
+
+		})
+	})
 
 	stats.update()
 	renderer.render(scene, camera)
@@ -317,6 +325,8 @@ gui.add(parameters, "directionalLightIntensity", 0, 1).onChange(() => {
 gui.add(parameters, "showDirectionalLightHelper").onChange(() => {
 	directionalLightHelper.visible = parameters.showDirectionalLightHelper
 })
+
+gui.add(parameters, "windIntensity", 0, 1, 0.01)
 
 //ground
 const groundFolder = gui.addFolder("Ground")
@@ -447,7 +457,7 @@ const snowFolder = gui.addFolder("Snow")
 snowFolder.add(parameters.snow, "visible").onChange(() => {
 	snowParticles.visible = parameters.snow.visible
 })
-snowFolder.add(parameters.snow, "count", 0, 500, 1).onChange(() => {
+snowFolder.add(parameters.snow, "count", 0, 1000, 1).onChange(() => {
 	generateSnowParticlesAttributes()
 	snowParticles.geometry.attributes.position.needsUpdate = true
 })
@@ -456,7 +466,4 @@ snowFolder.add(parameters.snow, "size", 0, 1, 0.01).onChange(() => {
 })
 snowFolder.addColor(parameters.snow, "color").onChange(() => {
 	snowParticlesMaterial.color.set(parameters.snow.color)
-})
-snowFolder.add(parameters.snow, "speed", 0, 1, 0.01).onChange(() => {
-	snowParticlesMaterial.speed = parameters.snow.speed
 })
