@@ -27,4 +27,4 @@ jobs:
     - name: Commit
       run: |
         git add dist/ -f
-        git subtree psuh --prefix dist origin gh-pages
+        git subtree push --prefix dist origin gh-pages
