@@ -24,7 +24,7 @@ jobs:
       run: |
         git checkout -b gh-pages
         git rm -rf .
-        git checkout origin
+        git checkout main
     - name: Setup git config
       run: |
         git config user.name "GitHub Actions Bot"
