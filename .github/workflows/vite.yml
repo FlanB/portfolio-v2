@@ -20,6 +20,11 @@ jobs:
       run: |
         npm install
         npm run build
+    - name: Clean gh-pages branch
+      run: |
+        git checkout -b gh-pages
+        git rm -rf .
+        git checkout main
     - name: Setup git config
       run: |
         git config user.name "GitHub Actions Bot"
@@ -27,12 +32,5 @@ jobs:
     - name: Commit
       run: |
         git add dist/ -f
-        
-        git stash
-        git remote update
-        git fetch 
-        git checkout --track origin/gh-pages
-        git stash pop
-        git commit -m "🚀 deploy"
-        git push 
-      
+        git commit -m "🚀 Deploy"
+        git subtree push --prefix dist origin gh-pages
