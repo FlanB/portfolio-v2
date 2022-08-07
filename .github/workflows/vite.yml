@@ -26,4 +26,5 @@ jobs:
         git config user.email "<>"
     - name: Commit
       run: |
-        git subtree --split --prefix dist gh-pages
+        git add dist/
+        git subtree psuh --prefix dist origin gh-pages
