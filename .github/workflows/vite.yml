@@ -26,13 +26,4 @@ jobs:
         git config user.email "<>"
     - name: Commit
       run: |
-        git add dist/index.html dist/assets/ -f
-        
-        git stash
-        git remote update
-        git fetch 
-        git checkout --track origin/gh-pages
-        git stash pop
-        git commit -m "🚀 deploy"
-        git push 
-      
+        git subtree push --prefix dist origin gh-pages    
