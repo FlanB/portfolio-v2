@@ -25,7 +25,7 @@ jobs:
         git checkout -b gh-pages
         git rm -rf .
         git fetch 
-        git rebase 
+        git rebase gh-pages
         git checkout main
     - name: Setup git config
       run: |
