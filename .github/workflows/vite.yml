@@ -27,7 +27,7 @@ jobs:
     - name: Commit
       run: |
         cd dist
-        git add .
+        git add . -f
         git commit -m '🚀 deploy'
     - name : Deployement
       run: git push -f git@github.com:flanb/portfolio-v2.git main:gh-pages
