@@ -22,12 +22,12 @@ jobs:
         npm run build
     - name: Setup git config
       run: |
-       
         git config user.name "GitHub Actions Bot"
         git config user.email "<>"
     - name: Commit
       run: |
         cd dist
-        git add -A
+        git add .
         git commit -m '🚀 deploy'
-        git push -f git@github.com:flanb/portfolio-v2.git main:gh-pages
+    - name : Deployement
+      run: git push -f git@github.com:flanb/portfolio-v2.git main:gh-pages
