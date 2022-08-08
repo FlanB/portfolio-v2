@@ -27,6 +27,9 @@ addEventListener("resize", () => {
 	camera.updateProjectionMatrix()
 })
 
+//RAYCASTER
+const raycaster = new THREE.Raycaster()
+
 // PARAMETERS
 const parameters = {
 	"backgroundColor": "#536375",
@@ -63,7 +66,7 @@ const parameters = {
 		"visible": true,
 		"count": 200,
 		"size": 0.1,
-		"color": "#ffffff",
+		"color": "#ffffff"
 	}
 }
 
@@ -97,6 +100,15 @@ camera.position.z = 5
 camera.position.y = 2
 
 scene.add(camera)
+
+/*
+* MOUSE
+* */
+const mouse = new THREE.Vector2()
+addEventListener("mousemove", event => {
+	mouse.x = (event.clientX / sizes.width) * 2 - 1
+	mouse.y = -(event.clientY / sizes.height) * 2 + 1
+})
 
 //PARTICLES
 const snowParticlesGeometry = new THREE.BufferGeometry()
@@ -290,12 +302,18 @@ const animate = () => {
 	}
 
 	//tree
-	scene.children.filter(child => child.name === "tree").forEach(tree => {
-		tree.children.filter(child => child.name === "leaves").forEach(leaves => {
+	const leavesObjects = scene.children.filter(child => child.name === "tree").map(tree => tree.children.filter(child => child.name === "leaves")).flat()
 
-			leaves.rotation.z = Math.abs(Math.sin(clock.getElapsedTime() * parameters.windIntensity * 10)) * 0.01
+	leavesObjects.forEach(leaves => {
+		leaves.rotation.z = Math.abs(Math.sin(clock.getElapsedTime() * parameters.windIntensity * 10)) * 0.01
+	})
 
-		})
+	//raycaster
+	raycaster.setFromCamera(mouse, camera)
+	const intersects = raycaster.intersectObjects(leavesObjects)
+
+	intersects.forEach(leaves => {
+			leaves.object.rotation.z = Math.sin(clock.getElapsedTime() * 10) * 0.02
 	})
 
 	stats.update()

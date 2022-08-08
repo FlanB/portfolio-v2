@@ -9,10 +9,11 @@ This is a simple portfolio that I currently made to upgrade my skills in THREE.j
 - [x] Snow
 - [ ] Daylight cycle
 - [x] Wind animation
-- [ ] When the mouse overing the tree, the leaves moves
+- [x] When the mouse overing the tree, the leaves moves
 - [ ] Water animation
-- [ ] Ground generation, when there is water next to it, there is more chance that there is still water
-- [ ] Same for mountains
+- [ ] Perlin noise for generation OR
+  - [ ] Ground generation, when there is water next to it, there is more chance that there is still water
+  - [ ] Same for mountains
 
 
-- [ ] Change weather based on the time of the day
+- [ ] Change weather based on daytime
