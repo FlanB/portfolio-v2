@@ -20,17 +20,17 @@ jobs:
       run: |
         npm install
         npm run build
-    - name: Clean gh-pages branch
-      run: |
-        git checkout -b gh-pages
-        
-        git checkout main
     - name: Setup git config
       run: |
+       
         git config user.name "GitHub Actions Bot"
         git config user.email "<>"
     - name: Commit
       run: |
-        git add dist/ -f
-        git commit -m "🚀 Deploy"
-        git subtree push --prefix dist origin gh-pages
+        cd dist
+        git init
+        git checkout -b main
+        git add -A
+        git commit -m '🚀 deploy'
+        git push -f git@github.com:flanb/portfolio-v2.git main:gh-pages
+        cd -
