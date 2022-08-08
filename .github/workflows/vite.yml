@@ -24,6 +24,8 @@ jobs:
       run: |
         git checkout -b gh-pages
         git rm -rf .
+        git fetch 
+        git rebase 
         git checkout main
     - name: Setup git config
       run: |
@@ -33,6 +35,4 @@ jobs:
       run: |
         git add dist/ -f
         git commit -m "🚀 Deploy"
-        git fetch gh-pages
-        git rebase gh-pages
         git subtree push --prefix dist origin gh-pages
