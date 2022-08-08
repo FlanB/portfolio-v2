@@ -23,9 +23,7 @@ jobs:
     - name: Clean gh-pages branch
       run: |
         git checkout -b gh-pages
-        git rm -rf .
-        git fetch 
-        git rebase gh-pages
+        
         git checkout main
     - name: Setup git config
       run: |
