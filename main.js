@@ -3,9 +3,18 @@ import * as THREE from "three"
 import Stats from "three/examples/jsm/libs/stats.module.js"
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 
-import * as dat from "dat.gui"
 
+import * as dat from "dat.gui"
 const gui = new dat.GUI()
+
+/*
+* TEXTURES
+* */
+
+const textureLoader = new THREE.TextureLoader()
+
+//snow particles texture
+const snowAlphaTexture = textureLoader.load("./textures/snow_flakes_alpha.png")
 
 // STATS
 const stats = Stats()
@@ -104,6 +113,7 @@ scene.add(camera)
 /*
 * MOUSE
 * */
+
 const mouse = new THREE.Vector2()
 addEventListener("mousemove", event => {
 	mouse.x = (event.clientX / sizes.width) * 2 - 1
@@ -130,7 +140,9 @@ generateSnowParticlesAttributes()
 
 const snowParticlesMaterial = new THREE.PointsMaterial({
 	color: parameters.snow.color,
+	alphaMap: snowAlphaTexture,
 	size: parameters.snow.size,
+	transparent: true,
 	sizeAttenuation: true
 })
 const snowParticles = new THREE.Points(snowParticlesGeometry, snowParticlesMaterial)
