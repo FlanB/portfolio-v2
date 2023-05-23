@@ -1,6 +1,6 @@
 {
-  "name": "portfolio-v2",
-  "private": true,
+  "name": "sapin",
+  "private": false,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
