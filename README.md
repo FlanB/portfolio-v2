@@ -1,5 +1,5 @@
-# portfolio-v2 in THREE.js
-This is a simple portfolio that I currently made to upgrade my skills in THREE.js.
+# experience in THREE.js
+This is a simple experiment that I currently made to upgrade my skills in THREE.js.
 
 ## TODO:
 
